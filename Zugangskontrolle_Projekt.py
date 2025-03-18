@@ -13,6 +13,7 @@ from ahtx0 import AHT10					#AHT10 Temperatur/Luft
 import st7789py as st7789
 import vga1_16x32 as font
 
+
 #----------------Sensor AHT10------------------#
 
 i2ct = SoftI2C(scl=Pin(5), sda=Pin(4))	#I2C für AHT10
@@ -41,7 +42,9 @@ display = st7789.ST7789(
     backlight = Pin(0, Pin.OUT),
     rotation = 3)
 
-#--------------Daten auswerten-----------------#
+#--------------Hauptprogramm-----------------#
+
+start = 
 
 while True:
     
