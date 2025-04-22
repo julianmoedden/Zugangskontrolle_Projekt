@@ -74,6 +74,10 @@ def set_servo_angle(angle):
     duty_servo = int(min_duty + (angle / 180) * (max_duty - min_duty))
     pwm_pin_servo.duty_u16(duty_servo)
 
+#----------Erkennung Tür geschlossen---------#
+
+taster = Pin(11, Pin.IN)
+
 #--------------Hauptprogramm-----------------#
 
 Startzeit = time.ticks_ms()
@@ -115,7 +119,7 @@ while True:
                         set_servo_angle(40)
                         time.sleep(5)
                         display.fill(st7789.BLACK)
-                    
+                        
                     elif '0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]) == "0x6ce81732":
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Jan-Luca Benkens".format(Temp), 30, 130, st7789.WHITE, st7789.BLACK)
@@ -133,4 +137,5 @@ while True:
                     print ("Tag nicht erkannt")
         except KeyboardInterrupt:
             display.fill(st7789.BLACK)
+            set_servo_angle(220)
             break
