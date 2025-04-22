@@ -116,6 +116,13 @@ while True:
                         time.sleep(5)
                         display.fill(st7789.BLACK)
                     
+                    elif '0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]) == "0x6ce81732":
+                        display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
+                        display.text(font, "Jan-Luca Benkens".format(Temp), 30, 130, st7789.WHITE, st7789.BLACK)
+                        set_servo_angle(40)
+                        time.sleep(5)
+                        display.fill(st7789.BLACK)
+                    
                     else:
                         display.text(font, "Zugang".format(Temp), 100, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "verweigert".format(Temp), 70, 130, st7789.WHITE, st7789.BLACK)
@@ -125,4 +132,5 @@ while True:
                 else:
                     print ("Tag nicht erkannt")
         except KeyboardInterrupt:
+            display.fill(st7789.BLACK)
             break
