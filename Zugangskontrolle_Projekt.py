@@ -7,9 +7,9 @@
 
 #----------------Bibliotheken------------------#
 
-from machine import Pin, SPI, SoftI2C	#Hardwareanschlüsse
-import time, network, socket			#Zeit zum sleep, WLan und Port
-from ahtx0 import AHT10					#AHT10 Temperatur/Luft
+from machine import Pin, SPI, SoftI2C, PWM	#Hardwareanschlüsse
+import time, network, socket				#Zeit zum sleep, WLan und Port
+from ahtx0 import AHT10						#AHT10 Temperatur/Luft
 import st7789py as st7789
 import vga1_16x32 as font
 from mfrc522 import MFRC522
@@ -53,11 +53,33 @@ spi = SoftSPI(baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cip
 sda = Pin(18, Pin.OUT)
 reader = MFRC522(spi, sda)
 
+#--------------Servo-Motor-------------------#
+
+pwm_pin_servo = PWM(Pin(38))	#Pin für Servo
+pwm_pin_servo.freq(50)			#Bestimmen der Frequenz
+
+#Berechnung Servobereich
+def set_servo_angle(angle):
+    
+    duty_servo = int(min_duty + (angle / 180) * (max_duty - min_duty))
+    pwm_pin_servo.duty_u16(duty_servo)
+    
+#duty_Bereich
+min_duty = 1000
+max_duty = 9000
+
+#Berechnung Servobereich
+def set_servo_angle(angle):
+    
+    duty_servo = int(min_duty + (angle / 180) * (max_duty - min_duty))
+    pwm_pin_servo.duty_u16(duty_servo)
+
 #--------------Hauptprogramm-----------------#
 
 Startzeit = time.ticks_ms()
 #Auswertung der Sensorwerte
 while True:
+    set_servo_angle(220)
     
     if time.ticks_diff(time.ticks_ms(), Startzeit) >= 2000:
         Startzeit = time.ticks_ms()
@@ -90,10 +112,15 @@ while True:
                     if '0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]) == "0x3cd6ef31":
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Julian Moedden".format(Temp), 40, 130, st7789.WHITE, st7789.BLACK)
+                        set_servo_angle(40)
+                        time.sleep(5)
+                        display.fill(st7789.BLACK)
                     
                     else:
                         display.text(font, "Zugang".format(Temp), 100, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "verweigert".format(Temp), 70, 130, st7789.WHITE, st7789.BLACK)
+                        time.sleep(2)
+                        display.fill(st7789.BLACK)
                 
                 else:
                     print ("Tag nicht erkannt")
