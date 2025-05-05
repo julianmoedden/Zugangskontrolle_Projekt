@@ -30,11 +30,20 @@ wlan.connect(ssid,passwort)				#Verbindung zum WLan herstellen
 
 while not wlan.isconnected():			#warten bis WLan verbunden ist
     print("Verbindung wird hergestellt...")
+    time.sleep(0.5)
     pass
 
 print("""Verbunden.
 IP-Adresse: """, wlan.ifconfig()[0])	#Textausgabe mit Verbindungsdaten
 
+#------------------------MQTT-----------------------#
+
+BROKER = "192.168.1.218"						#MQTT-Broker (mosquitto)
+PORT = 1883										#Portnummer
+CLIENT_ID = "JMD"								#client ID
+TOPIC = "esp32/sensor"							#Das abonnierte Topic
+
+client = MQTTClient(CLIENT_ID, BROKER, PORT)	#Client Einstellungen
 
 #----------------Sensor AHT10------------------#
 
@@ -133,6 +142,18 @@ while True:
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Julian Moedden".format(Temp), 40, 130, st7789.WHITE, st7789.BLACK)
                         set_servo_angle(40)
+                        #Werte als JSON-Datei erstellen
+                        zugang = {"Zugang": "Julian Moedden"}
+
+                        json_string = json.dumps(zugang)
+
+                        #Verbindung mit Client
+                        client.connect()
+                        print("Mit MQTT-BROKER verbinden")
+
+                        #Nachricht senden
+                        client.publish(TOPIC, json_string)
+                        print(f"Nachricht gesendet: {json_string}")
                         time.sleep(10)
                         display.fill(st7789.BLACK)
                         
@@ -140,6 +161,18 @@ while True:
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Jan-Luca Benkens".format(Temp), 30, 130, st7789.WHITE, st7789.BLACK)
                         set_servo_angle(40)
+                        #Werte als JSON-Datei erstellen
+                        zugang = {"Zugang": "Jan-Luca Benkens"}
+
+                        json_string = json.dumps(zugang)
+
+                        #Verbindung mit Client
+                        client.connect()
+                        print("Mit MQTT-BROKER verbinden")
+
+                        #Nachricht senden
+                        client.publish(TOPIC, json_string)
+                        print(f"Nachricht gesendet: {json_string}")
                         time.sleep(10)
                         display.fill(st7789.BLACK)
                     
