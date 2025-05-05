@@ -179,6 +179,18 @@ while True:
                     else:
                         display.text(font, "Zugang".format(Temp), 100, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "verweigert".format(Temp), 70, 130, st7789.WHITE, st7789.BLACK)
+                        #Werte als JSON-Datei erstellen
+                        zugang = {"Zugang": "fehlerhafter Zugang"}
+
+                        json_string = json.dumps(zugang)
+
+                        #Verbindung mit Client
+                        client.connect()
+                        print("Mit MQTT-BROKER verbinden")
+
+                        #Nachricht senden
+                        client.publish(TOPIC, json_string)
+                        print(f"Nachricht gesendet: {json_string}")
                         time.sleep(2)
                         display.fill(st7789.BLACK)
                 
