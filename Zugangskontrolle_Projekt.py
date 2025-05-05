@@ -8,12 +8,32 @@
 #----------------Bibliotheken------------------#
 
 from machine import Pin, SPI, SoftI2C, PWM	#Hardwareanschlüsse
-import time, network, socket				#Zeit zum sleep, WLan und Port
+import time, network, socket, json				#Zeit zum sleep, WLan und Port
+from umqtt.simple import MQTTClient			#MQTT zum Empfangen der Daten
 from ahtx0 import AHT10						#AHT10 Temperatur/Luft
-import st7789py as st7789
-import vga1_16x32 as font
-from mfrc522 import MFRC522
-from machine import Pin, SPI, SoftSPI#Hardwareanschlüsse
+import st7789py as st7789					#Display zum Anzeigen
+import vga1_16x32 as font					#Anzeigeeinstellung
+from mfrc522 import MFRC522					#Chiperkennung
+from machine import Pin, SPI, SoftSPI		#Hardwareanschlüsse
+
+#-------Initialisieren der WLan-Verbindung---------#
+
+#WLan Anmeldedaten
+ssid = "BZTG-IoT"
+passwort = "WerderBremen24"
+
+wlan = network.WLAN(network.STA_IF)		#WLan-Client erzeugen
+wlan.active(False)						#WLan reset (zum Trennen aller Verbindungen)
+wlan.active(True)						#WLan einschalten
+time.sleep(0.5)								#warten bis WLan eingeschaltet ist
+wlan.connect(ssid,passwort)				#Verbindung zum WLan herstellen
+
+while not wlan.isconnected():			#warten bis WLan verbunden ist
+    print("Verbindung wird hergestellt...")
+    pass
+
+print("""Verbunden.
+IP-Adresse: """, wlan.ifconfig()[0])	#Textausgabe mit Verbindungsdaten
 
 
 #----------------Sensor AHT10------------------#
@@ -74,10 +94,6 @@ def set_servo_angle(angle):
     duty_servo = int(min_duty + (angle / 180) * (max_duty - min_duty))
     pwm_pin_servo.duty_u16(duty_servo)
 
-#----------Erkennung Tür geschlossen---------#
-
-taster = Pin(11, Pin.IN)
-
 #--------------Hauptprogramm-----------------#
 
 Startzeit = time.ticks_ms()
@@ -117,14 +133,14 @@ while True:
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Julian Moedden".format(Temp), 40, 130, st7789.WHITE, st7789.BLACK)
                         set_servo_angle(40)
-                        time.sleep(5)
+                        time.sleep(10)
                         display.fill(st7789.BLACK)
                         
                     elif '0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]) == "0x6ce81732":
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Jan-Luca Benkens".format(Temp), 30, 130, st7789.WHITE, st7789.BLACK)
                         set_servo_angle(40)
-                        time.sleep(5)
+                        time.sleep(10)
                         display.fill(st7789.BLACK)
                     
                     else:
