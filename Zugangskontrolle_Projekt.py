@@ -131,6 +131,8 @@ while True:
         #Textanzeige
         display.text(font, "{} C".format(Temp), 20, 30, st7789.WHITE, st7789.BLACK)
         display.text(font, "{} %".format(Luft), 200, 30, st7789.WHITE, st7789.BLACK)
+        display.text(font, "Bitte die Karte".format(Temp), 40, 90, st7789.WHITE, st7789.BLACK)
+        display.text(font, "vorhalten.".format(Temp), 80, 130, st7789.WHITE, st7789.BLACK)
         
         #Werte als JSON-Datei erstellen
         werte = {"Temperatur": Temp,
@@ -151,6 +153,7 @@ while True:
                     print (' uid: 0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]))
                     
                     if '0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]) == "0x3cd6ef31":
+                        display.fill(st7789.BLACK)
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Julian Moedden".format(Temp), 40, 130, st7789.WHITE, st7789.BLACK)
                         set_servo_angle(40)
@@ -166,6 +169,7 @@ while True:
                         display.fill(st7789.BLACK)
                         
                     elif '0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]) == "0x6ce81732":
+                        display.fill(st7789.BLACK)
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "Jan-Luca Benkens".format(Temp), 30, 130, st7789.WHITE, st7789.BLACK)
                         set_servo_angle(40)
@@ -181,6 +185,7 @@ while True:
                         display.fill(st7789.BLACK)
                     
                     else:
+                        display.fill(st7789.BLACK)
                         display.text(font, "Zugang".format(Temp), 100, 90, st7789.WHITE, st7789.BLACK)
                         display.text(font, "verweigert".format(Temp), 70, 130, st7789.WHITE, st7789.BLACK)
                         #Werte als JSON-Datei erstellen
