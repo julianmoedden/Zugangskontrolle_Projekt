@@ -41,9 +41,13 @@ IP-Adresse: """, wlan.ifconfig()[0])	#Textausgabe mit Verbindungsdaten
 BROKER = "192.168.1.218"						#MQTT-Broker (mosquitto)
 PORT = 1883										#Portnummer
 CLIENT_ID = "JMD"								#client ID
-TOPIC = "esp32/sensor"							#Das abonnierte Topic
+TOPIC_C = "esp32/sensor"							#Das abonnierte Topic Chiperkennung
+TOPIC_S = "esp32/umw"							#das abonnierte Topic Umweltdaten
 
 client = MQTTClient(CLIENT_ID, BROKER, PORT)	#Client Einstellungen
+#Verbindung mit Client
+client.connect()
+print("Mit MQTT-BROKER verbinden")
 
 #----------------Sensor AHT10------------------#
 
@@ -127,8 +131,16 @@ while True:
         #Textanzeige
         display.text(font, "{} C".format(Temp), 20, 30, st7789.WHITE, st7789.BLACK)
         display.text(font, "{} %".format(Luft), 200, 30, st7789.WHITE, st7789.BLACK)
-            
-        print(Temp, ", ", Luft)
+        
+        #Werte als JSON-Datei erstellen
+        werte = {"Temperatur": Temp,
+                 "Luftfeuchtigkeit": Luft}
+
+        json_string = json.dumps(werte)
+
+    #Nachricht senden
+        client.publish(TOPIC_S, json_string)
+        print(f"Nachricht gesendet: {json_string}")
     
     else:
         try:
@@ -145,15 +157,11 @@ while True:
                         #Werte als JSON-Datei erstellen
                         zugang = {"Zugang": "Julian Moedden"}
 
-                        json_string = json.dumps(zugang)
-
-                        #Verbindung mit Client
-                        client.connect()
-                        print("Mit MQTT-BROKER verbinden")
+                        json_zugang = json.dumps(zugang)
 
                         #Nachricht senden
-                        client.publish(TOPIC, json_string)
-                        print(f"Nachricht gesendet: {json_string}")
+                        client.publish(TOPIC_C, json_zugang)
+                        print(f"Nachricht gesendet: {json_zugang}")
                         time.sleep(10)
                         display.fill(st7789.BLACK)
                         
@@ -164,15 +172,11 @@ while True:
                         #Werte als JSON-Datei erstellen
                         zugang = {"Zugang": "Jan-Luca Benkens"}
 
-                        json_string = json.dumps(zugang)
-
-                        #Verbindung mit Client
-                        client.connect()
-                        print("Mit MQTT-BROKER verbinden")
+                        json_zugang = json.dumps(zugang)
 
                         #Nachricht senden
-                        client.publish(TOPIC, json_string)
-                        print(f"Nachricht gesendet: {json_string}")
+                        client.publish(TOPIC_C, json_zugang)
+                        print(f"Nachricht gesendet: {json_zugang}")
                         time.sleep(10)
                         display.fill(st7789.BLACK)
                     
@@ -182,15 +186,11 @@ while True:
                         #Werte als JSON-Datei erstellen
                         zugang = {"Zugang": "fehlerhafter Zugang"}
 
-                        json_string = json.dumps(zugang)
-
-                        #Verbindung mit Client
-                        client.connect()
-                        print("Mit MQTT-BROKER verbinden")
+                        json_zugang = json.dumps(zugang)
 
                         #Nachricht senden
-                        client.publish(TOPIC, json_string)
-                        print(f"Nachricht gesendet: {json_string}")
+                        client.publish(TOPIC_C, json_zugang)
+                        print(f"Nachricht gesendet: {json_zugang}")
                         time.sleep(2)
                         display.fill(st7789.BLACK)
                 
