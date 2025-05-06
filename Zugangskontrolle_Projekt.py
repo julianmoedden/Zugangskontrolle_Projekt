@@ -8,7 +8,7 @@
 #----------------Bibliotheken------------------#
 
 from machine import Pin, SPI, SoftI2C, PWM	#Hardwareanschlüsse
-import time, network, socket, json				#Zeit zum sleep, WLan und Port
+import time, network, socket, json			#Zeit zum sleep, WLan und Port
 from umqtt.simple import MQTTClient			#MQTT zum Empfangen der Daten
 from ahtx0 import AHT10						#AHT10 Temperatur/Luft
 import st7789py as st7789					#Display zum Anzeigen
@@ -16,7 +16,9 @@ import vga1_16x32 as font					#Anzeigeeinstellung
 from mfrc522 import MFRC522					#Chiperkennung
 from machine import Pin, SPI, SoftSPI		#Hardwareanschlüsse
 
-#---------------- Funktion zur Datenauswertung ------------- 
+#---------------- Funktion zur Datenauswertung -------------#
+
+#Definierung einer Funktion zum Verwerten der daten von Node-Red
 def sub_button(topic, msg):  
     daten = json.loads(msg) 
     button = daten.get('manual') 
@@ -28,9 +30,9 @@ def sub_button(topic, msg):
         print(button)
     else: 
         global door_open 
-        door_open = False     # Wichtig: Globale Variable nutzen und keine 
+        door_open = False     # Wichtig: Globale Variable nutzen, damit sie verwertbar sind 
         print(button)
-        # sonst ausschalten 
+        # sonst schließen 
 
 #-------Initialisieren der WLan-Verbindung---------#
 
@@ -41,7 +43,7 @@ passwort = "WerderBremen24"
 wlan = network.WLAN(network.STA_IF)		#WLan-Client erzeugen
 wlan.active(False)						#WLan reset (zum Trennen aller Verbindungen)
 wlan.active(True)						#WLan einschalten
-time.sleep(0.5)								#warten bis WLan eingeschaltet ist
+time.sleep(0.5)							#warten bis WLan eingeschaltet ist
 wlan.connect(ssid,passwort)				#Verbindung zum WLan herstellen
 
 while not wlan.isconnected():			#warten bis WLan verbunden ist
@@ -110,18 +112,12 @@ reader = MFRC522(spi, sda)
 
 pwm_pin_servo = PWM(Pin(38))	#Pin für Servo
 pwm_pin_servo.freq(50)			#Bestimmen der Frequenz
-
-#Berechnung Servobereich
-def set_servo_angle(angle):
-    
-    duty_servo = int(min_duty + (angle / 180) * (max_duty - min_duty))
-    pwm_pin_servo.duty_u16(duty_servo)
     
 #duty_Bereich
 min_duty = 1000
 max_duty = 9000
 
-#Berechnung Servobereich
+#Berechnung Servobereich 0-360 Grad
 def set_servo_angle(angle):
     
     duty_servo = int(min_duty + (angle / 180) * (max_duty - min_duty))
@@ -129,11 +125,13 @@ def set_servo_angle(angle):
 
 #--------------Hauptprogramm-----------------#
 
+#Start der Zählung zum Sensorenauswerten
 Startzeit = time.ticks_ms()
 #Auswertung der Sensorwerte
 while True:
     set_servo_angle(220)
     
+    #alle 2 Sekunden werden die Sensoren gelesen
     if time.ticks_diff(time.ticks_ms(), Startzeit) >= 2000:
         Startzeit = time.ticks_ms()
     
@@ -164,9 +162,11 @@ while True:
         client.publish(TOPIC_S, json_string)
         print(f"Nachricht gesendet: {json_string}")
     
+    #Checkt die Nachricht, ob die Tür manuell geöffnet wird
     elif client.check_msg():
         print (door_open)
         if door_open:
+            #Display-Ausgabe
             display.fill(st7789.BLACK)
             display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
             set_servo_angle(40)
@@ -182,14 +182,18 @@ while True:
             display.fill(st7789.BLACK)
         else:
             continue
+    
     else:
         try:
+            #Erkennung, des Chiptags
             (status, tag_type) = reader.request(reader.CARD_REQIDL)
             if status == reader.OK:
+                #Erkennung der UID
                 (status, raw_uid) = reader.anticoll()
                 if status == reader.OK:
                     print (' uid: 0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]))
                     
+                    #Vergleicht UID des Chips, mit der Gespeicherten
                     if '0x%02x%02x%02x%02x' % (raw_uid[0], raw_uid[1], raw_uid[2], raw_uid[3]) == "0x3cd6ef31":
                         display.fill(st7789.BLACK)
                         display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
@@ -239,6 +243,8 @@ while True:
                 
                 else:
                     print ("Tag nicht erkannt")
+                    
+        #Kann durch einfaches drücken der Tastatur gestoppt werden
         except KeyboardInterrupt:
             display.fill(st7789.BLACK)
             set_servo_angle(220)
