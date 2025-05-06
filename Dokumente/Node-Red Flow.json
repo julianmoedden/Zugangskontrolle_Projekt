@@ -1,0 +1,340 @@
+[
+    {
+        "id": "87c1468bb7268c40",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3c4c68145063bdcf",
+        "type": "mqtt in",
+        "z": "87c1468bb7268c40",
+        "name": "",
+        "topic": "esp32/sensor",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "b6930c8e6710fedb",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 360,
+        "wires": [
+            [
+                "da079a260c1a8d8d"
+            ]
+        ]
+    },
+    {
+        "id": "610ccfdeee71f85d",
+        "type": "function",
+        "z": "87c1468bb7268c40",
+        "name": "function 1",
+        "func": "var temperatur = {payload: msg.payload.Temperatur}\nreturn temperatur;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "0846a6e3b9a6f815"
+            ]
+        ]
+    },
+    {
+        "id": "0e8c4dbb5ae90a12",
+        "type": "function",
+        "z": "87c1468bb7268c40",
+        "name": "function 2",
+        "func": "var luft = {payload: msg.payload.Luftfeuchtigkeit}\nreturn luft;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 180,
+        "wires": [
+            [
+                "4c496c29634294fe"
+            ]
+        ]
+    },
+    {
+        "id": "6a47a130c920af31",
+        "type": "mysql",
+        "z": "87c1468bb7268c40",
+        "mydb": "03c51fd2f293509e",
+        "name": "Datenbank",
+        "x": 630,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "da079a260c1a8d8d",
+        "type": "function",
+        "z": "87c1468bb7268c40",
+        "name": "In Datenbank schreiben",
+        "func": "let zugang = msg.payload.Zugang;\n\nlet now = new Date();\n// +2 Stunden zur lokalen Zeit addieren\nnow.setHours(now.getHours() + 2);\n\n//Timestamp in einem Format, das SQL verarbeiten kann (YYY-MM-DD HH:MM:SS)\nlet timestamp = now.toISOString().replace(\"T\", \" \").substring(0, 19);\n\nmsg.topic = \"INSERT INTO zugangskontrolle (Name, Time) VALUES (?, ?)\";\nmsg.payload = [zugang, timestamp];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 360,
+        "wires": [
+            [
+                "6a47a130c920af31"
+            ]
+        ]
+    },
+    {
+        "id": "b3a6101a7d533647",
+        "type": "mqtt in",
+        "z": "87c1468bb7268c40",
+        "name": "",
+        "topic": "esp32/umw",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "b6930c8e6710fedb",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "610ccfdeee71f85d",
+                "0e8c4dbb5ae90a12",
+                "2cf41c8b560a3d09"
+            ]
+        ]
+    },
+    {
+        "id": "0846a6e3b9a6f815",
+        "type": "ui_chart",
+        "z": "87c1468bb7268c40",
+        "name": "",
+        "group": "70cb072237b581f0",
+        "order": 2,
+        "width": 6,
+        "height": 7,
+        "label": "Temperatur",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "10",
+        "ymax": "35",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 610,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4c496c29634294fe",
+        "type": "ui_chart",
+        "z": "87c1468bb7268c40",
+        "name": "",
+        "group": "70cb072237b581f0",
+        "order": 1,
+        "width": 6,
+        "height": 7,
+        "label": "Luftfeuchtigkeit",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 620,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "55fb559baea9443b",
+        "type": "mqtt out",
+        "z": "87c1468bb7268c40",
+        "name": "",
+        "topic": "esp32/manual",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "b6930c8e6710fedb",
+        "x": 620,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "872e6ea3520a11dd",
+        "type": "ui_button",
+        "z": "87c1468bb7268c40",
+        "name": "",
+        "group": "70cb072237b581f0",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Tür manuell öffnen",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "{\"manual\":\"OPEN\"}",
+        "payloadType": "json",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 150,
+        "y": 500,
+        "wires": [
+            [
+                "55fb559baea9443b"
+            ]
+        ]
+    },
+    {
+        "id": "2cf41c8b560a3d09",
+        "type": "function",
+        "z": "87c1468bb7268c40",
+        "name": "in Datenbank schreiben (Umw)",
+        "func": "let TEMP = msg.payload.Temperatur;\nlet LUFT = msg.payload.Luftfeuchtigkeit;\n\nmsg.topic = \"INSERT INTO umweltdaten (TEMP, LUFT) VALUES (?, ?)\";\nmsg.payload = [TEMP, LUFT];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 280,
+        "wires": [
+            [
+                "6a47a130c920af31"
+            ]
+        ]
+    },
+    {
+        "id": "b6930c8e6710fedb",
+        "type": "mqtt-broker",
+        "name": "JMD_01",
+        "broker": "127.0.0.1",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "03c51fd2f293509e",
+        "type": "MySQLdatabase",
+        "name": "Zugangskontrolle",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "zugangskontrolle",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "70cb072237b581f0",
+        "type": "ui_group",
+        "name": "Standard",
+        "tab": "77c52bd2b49c5552",
+        "order": 4,
+        "disp": true,
+        "width": 12,
+        "collapse": false,
+        "className": "Name"
+    },
+    {
+        "id": "77c52bd2b49c5552",
+        "type": "ui_tab",
+        "name": "ESP32",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
