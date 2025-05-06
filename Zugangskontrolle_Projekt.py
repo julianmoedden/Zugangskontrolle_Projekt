@@ -16,6 +16,22 @@ import vga1_16x32 as font					#Anzeigeeinstellung
 from mfrc522 import MFRC522					#Chiperkennung
 from machine import Pin, SPI, SoftSPI		#Hardwareanschlüsse
 
+#---------------- Funktion zur Datenauswertung ------------- 
+def sub_button(topic, msg):  
+    daten = json.loads(msg) 
+    button = daten.get('manual') 
+    if button == "OPEN":     
+# Knopf ist gedrückt 
+        global door_open    
+#neue Variable erzeugen 
+        door_open = True
+        print(button)
+    else: 
+        global door_open 
+        door_open = False     # Wichtig: Globale Variable nutzen und keine 
+        print(button)
+        # sonst ausschalten 
+
 #-------Initialisieren der WLan-Verbindung---------#
 
 #WLan Anmeldedaten
@@ -41,12 +57,16 @@ IP-Adresse: """, wlan.ifconfig()[0])	#Textausgabe mit Verbindungsdaten
 BROKER = "192.168.1.218"						#MQTT-Broker (mosquitto)
 PORT = 1883										#Portnummer
 CLIENT_ID = "JMD"								#client ID
-TOPIC_C = "esp32/sensor"							#Das abonnierte Topic Chiperkennung
-TOPIC_S = "esp32/umw"							#das abonnierte Topic Umweltdaten
+TOPIC_C = "esp32/sensor"						#Das Topic Chiperkennung
+TOPIC_S = "esp32/umw"							#das Topic Umweltdaten
+TOPIC_M = "esp32/manual"						#das abonnierte Topic Tür manuell öffnen
 
 client = MQTTClient(CLIENT_ID, BROKER, PORT)	#Client Einstellungen
 #Verbindung mit Client
+client.set_callback(sub_button)
+time.sleep(1)
 client.connect()
+client.subscribe(TOPIC_M)
 print("Mit MQTT-BROKER verbinden")
 
 #----------------Sensor AHT10------------------#
@@ -144,6 +164,24 @@ while True:
         client.publish(TOPIC_S, json_string)
         print(f"Nachricht gesendet: {json_string}")
     
+    elif client.check_msg():
+        print (door_open)
+        if door_open:
+            display.fill(st7789.BLACK)
+            display.text(font, "Willkommen".format(Temp), 80, 90, st7789.WHITE, st7789.BLACK)
+            set_servo_angle(40)
+            #Werte als JSON-Datei erstellen
+            zugang = {"Zugang": "Manuell"}
+
+            json_zugang = json.dumps(zugang)
+
+            #Nachricht senden
+            client.publish(TOPIC_C, json_zugang)
+            print(f"Nachricht gesendet: {json_zugang}")
+            time.sleep(10)
+            display.fill(st7789.BLACK)
+        else:
+            continue
     else:
         try:
             (status, tag_type) = reader.request(reader.CARD_REQIDL)
@@ -197,7 +235,7 @@ while True:
                         client.publish(TOPIC_C, json_zugang)
                         print(f"Nachricht gesendet: {json_zugang}")
                         time.sleep(2)
-                        display.fill(st7789.BLACK)
+                        display.fill(st7789.BLACK) 
                 
                 else:
                     print ("Tag nicht erkannt")
