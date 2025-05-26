@@ -37,8 +37,8 @@ def sub_button(topic, msg):
 #-------Initialisieren der WLan-Verbindung---------#
 
 #WLan Anmeldedaten
-ssid = "BZTG-IoT"
-passwort = "WerderBremen24"
+ssid = "xxx"
+passwort = "xxx"
 
 wlan = network.WLAN(network.STA_IF)		#WLan-Client erzeugen
 wlan.active(False)						#WLan reset (zum Trennen aller Verbindungen)
@@ -56,7 +56,7 @@ IP-Adresse: """, wlan.ifconfig()[0])	#Textausgabe mit Verbindungsdaten
 
 #------------------------MQTT-----------------------#
 
-BROKER = "192.168.1.218"						#MQTT-Broker (mosquitto)
+BROKER = "192.168.1.136"						#MQTT-Broker (mosquitto)
 PORT = 1883										#Portnummer
 CLIENT_ID = "JMD"								#client ID
 TOPIC_C = "esp32/sensor"						#Das Topic Chiperkennung
@@ -129,7 +129,7 @@ def set_servo_angle(angle):
 Startzeit = time.ticks_ms()
 #Auswertung der Sensorwerte
 while True:
-    set_servo_angle(220)
+    set_servo_angle(100)
     
     #alle 2 Sekunden werden die Sensoren gelesen
     if time.ticks_diff(time.ticks_ms(), Startzeit) >= 2000:
@@ -247,5 +247,5 @@ while True:
         #Kann durch einfaches drücken der Tastatur gestoppt werden
         except KeyboardInterrupt:
             display.fill(st7789.BLACK)
-            set_servo_angle(220)
+            set_servo_angle(100)
             break
